@@ -543,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="share-icon">💬</span>
           <span class="tooltip-text">Share on WhatsApp</span>
         </button>
-        <button class="share-btn share-email tooltip" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share via Email">
+        <button class="share-btn share-email tooltip" data-activity="${name}" data-description="${details.description.substring(0, 200)}" data-schedule="${formattedSchedule}" title="Share via Email">
           <span class="share-icon">✉️</span>
           <span class="tooltip-text">Share via Email</span>
         </button>
@@ -836,8 +836,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const description = button.dataset.description;
     const schedule = button.dataset.schedule;
     
-    // Create share text and URL
-    const shareText = `Check out ${activityName} at Mergington High School! ${description}... Schedule: ${schedule}`;
+    // Create share text and URL - only add ellipsis if description was truncated
+    const ellipsis = description.length >= 100 ? '...' : '';
+    const shareText = `Check out ${activityName} at Mergington High School! ${description}${ellipsis} Schedule: ${schedule}`;
     const shareUrl = window.location.href;
     
     // Determine which share button was clicked
@@ -854,18 +855,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
       window.open(whatsappUrl, '_blank');
     } else if (button.classList.contains('share-email')) {
-      // Email share
+      // Email share - use longer description for email
+      const emailEllipsis = description.length >= 200 ? '...' : '';
+      const emailText = `Check out ${activityName} at Mergington High School! ${description}${emailEllipsis} Schedule: ${schedule}`;
       const subject = encodeURIComponent(`Mergington High School Activity: ${activityName}`);
-      const body = encodeURIComponent(`${shareText}\n\nLearn more at: ${shareUrl}`);
+      const body = encodeURIComponent(`${emailText}\n\nLearn more at: ${shareUrl}`);
       window.location.href = `mailto:?subject=${subject}&body=${body}`;
     } else if (button.classList.contains('share-copy')) {
-      // Copy to clipboard
+      // Copy to clipboard with fallback for non-HTTPS
       const textToCopy = `${shareText}\n${shareUrl}`;
-      navigator.clipboard.writeText(textToCopy).then(() => {
-        showMessage('Link copied to clipboard!', 'success');
-      }).catch(() => {
-        showMessage('Failed to copy link. Please try again.', 'error');
-      });
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          showMessage('Link copied to clipboard!', 'success');
+        }).catch(() => {
+          showMessage('Failed to copy link. Please try again.', 'error');
+        });
+      } else {
+        // Fallback for browsers without clipboard API
+        showMessage('Copy feature not available. Please copy the URL manually.', 'error');
+      }
     }
   }
 
