@@ -836,8 +836,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const description = button.dataset.description;
     const schedule = button.dataset.schedule;
     
-    // Create share text and URL - only add ellipsis if description was truncated
-    const ellipsis = description.length >= 100 ? '...' : '';
+    // Create share text and URL - add ellipsis if description was truncated to 100 chars
+    const ellipsis = description.length === 100 ? '...' : '';
     const shareText = `Check out ${activityName} at Mergington High School! ${description}${ellipsis} Schedule: ${schedule}`;
     const shareUrl = window.location.href;
     
@@ -855,8 +855,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
       window.open(whatsappUrl, '_blank');
     } else if (button.classList.contains('share-email')) {
-      // Email share - use longer description for email
-      const emailEllipsis = description.length >= 200 ? '...' : '';
+      // Email share - use longer description truncated to 200 chars
+      const emailEllipsis = description.length === 200 ? '...' : '';
       const emailText = `Check out ${activityName} at Mergington High School! ${description}${emailEllipsis} Schedule: ${schedule}`;
       const subject = encodeURIComponent(`Mergington High School Activity: ${activityName}`);
       const body = encodeURIComponent(`${emailText}\n\nLearn more at: ${shareUrl}`);
